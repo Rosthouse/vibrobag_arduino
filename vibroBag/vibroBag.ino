@@ -62,6 +62,7 @@ void setup(void)
 /**************************************************************************/
 aci_evt_opcode_t laststatus = ACI_EVT_DISCONNECTED;
 
+//Main loop
 void loop(){
   aci_evt_opcode_t status = getStatus();
   checkPreviousState(status);
@@ -78,6 +79,7 @@ void loop(){
   }
 }
 
+//Gets the current status of the bluetooth breakout
 aci_evt_opcode_t getStatus(){
   // Tell the nRF8001 to do whatever it should be working on.
   BTLEserial.pollACI();
@@ -85,6 +87,7 @@ aci_evt_opcode_t getStatus(){
   return BTLEserial.getState();
 }
 
+//Checks if any change of state has occured. This is purely for logging
 void checkPreviousState(aci_evt_opcode_t current){
 
   // If the status changed....
@@ -106,6 +109,7 @@ void checkPreviousState(aci_evt_opcode_t current){
 
 }
 
+//Checks if a commando has been sent to arduino
 String receiveCommand(){
   char command[20];
   String commandString = String("");
@@ -125,6 +129,7 @@ String receiveCommand(){
   return commandString;
 }
 
+//Executes a commando sent to Arduino
 void executeCommand(String command){      
   if(command.equals("vbon")){
     Serial.println("Activating Vibration");
@@ -135,14 +140,9 @@ void executeCommand(String command){
   } 
 }
 
-int previousSwitchState = LOW;
-
+//Writes a string to a connected device. Max 20 chars long
 void writeStringToConnectedDevice(String message){
-
-
   uint8_t sendbuffer[20];
-
-
   message.getBytes(sendbuffer, 20);
   char sendbuffersize = min(20, message.length());
   Serial.print(F("\n* Sending -> \"")); 
@@ -152,13 +152,13 @@ void writeStringToConnectedDevice(String message){
       BTLEserial.write(sendbuffer, sendbuffersize);
 }
 
+//Sends a message to the connected smartphone to activate its display
 void activateConnectedDisplay(){
   String s = String ("dspon");
   writeStringToConnectedDevice(s);
 }
 
-
-
+//Writes information coming from serial to the connected device
 void writeSerialInfos(){
   if (Serial.available()) {
       // Read a line from Serial
@@ -168,6 +168,8 @@ void writeSerialInfos(){
     }
 }
 
+//Checks wheter to activate the connected smartphones display
+int previousSwitchState = LOW;
 bool enableConnectedDisplay(){
   bool enableDisplay = false;
   int switchState = digitalRead( SCREEN_SWITCH );
